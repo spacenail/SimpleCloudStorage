@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -82,6 +83,20 @@ public class ClientController implements Initializable {
         }
     }
 
+    private void clientViewHandler(MouseEvent event){
+        if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+            String item = clientView.getSelectionModel().getSelectedItem();
+            if ("...".equals(item)) {
+                if (clientDirectory.getParent() != null) {
+                    clientDirectory = clientDirectory.getParent();
+                }
+            } else if (clientDirectory.resolve(item).toFile().isDirectory()) {
+                clientDirectory = clientDirectory.resolve(item);
+            }
+            updateClientView();
+        }
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -91,19 +106,7 @@ public class ClientController implements Initializable {
             objectDecoderInputStream = new ObjectDecoderInputStream(socket.getInputStream());
             clientDirectory = Paths.get("ClientDirectory").toAbsolutePath();
 
-            clientView.setOnMouseClicked(event -> {
-                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-                    String item = clientView.getSelectionModel().getSelectedItem();
-                    if ("...".equals(item)) {
-                        if (clientDirectory.getParent() != null) {
-                            clientDirectory = clientDirectory.getParent();
-                        }
-                    } else if (clientDirectory.resolve(item).toFile().isDirectory()) {
-                        clientDirectory = clientDirectory.resolve(item);
-                    }
-                    updateClientView();
-                }
-            });
+            clientView.setOnMouseClicked(this::clientViewHandler);
 
             updateClientView();
             Thread readThread = new Thread(() -> read());
