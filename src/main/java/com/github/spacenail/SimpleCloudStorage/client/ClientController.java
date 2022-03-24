@@ -7,9 +7,11 @@ import com.github.spacenail.SimpleCloudStorage.model.ListMessage;
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import javafx.application.Platform;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseButton;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -21,29 +23,32 @@ import java.util.*;
 
 
 public class ClientController implements Initializable {
-
-    public ListView<String> clientView;
-    public ListView<String> serverView;
-    public TextField clientPath;
-    public TextField serverPath;
+    @FXML
+    private ListView<String> clientView;
+    @FXML
+    private ListView<String> serverView;
+    @FXML
+    private TextField clientPath;
+    @FXML
+    private TextField serverPath;
     private ObjectEncoderOutputStream objectEncoderOutputStream;
     private ObjectDecoderInputStream objectDecoderInputStream;
     private Path clientDirectory;
 
     public void download() throws IOException {
-    objectEncoderOutputStream.writeObject(new FileRequestMessage(serverView.getSelectionModel().getSelectedItem()));
+        objectEncoderOutputStream.writeObject(new FileRequestMessage(serverView.getSelectionModel().getSelectedItem()));
     }
 
     public void upload() throws IOException {
-    objectEncoderOutputStream.writeObject(new FileMessage(clientDirectory.resolve(clientView.getSelectionModel().getSelectedItem())));
+        objectEncoderOutputStream.writeObject(new FileMessage(clientDirectory.resolve(clientView.getSelectionModel().getSelectedItem())));
     }
 
     public void close() {
-    Platform.exit();
+        Platform.exit();
     }
 
-    public void updateClientView(){
-        Platform.runLater(()->{
+    public void updateClientView() {
+        Platform.runLater(() -> {
             clientPath.setText(clientDirectory.toAbsolutePath().toString());
             clientView.getItems().clear();
             clientView.getItems().add("...");
@@ -54,16 +59,16 @@ public class ClientController implements Initializable {
     private void read() {
         while (true) {
             try {
-                CloudMessage message = (CloudMessage)objectDecoderInputStream.readObject();
+                CloudMessage message = (CloudMessage) objectDecoderInputStream.readObject();
                 switch (message.getMessageType()) {
                     case FILE:
                         FileMessage fileMessage = (FileMessage) message;
-                        Files.write(clientDirectory.resolve(fileMessage.getName()),fileMessage.getBytes());
+                        Files.write(clientDirectory.resolve(fileMessage.getName()), fileMessage.getBytes());
                         updateClientView();
                         break;
                     case LIST:
                         ListMessage listMessage = (ListMessage) message;
-                        Platform.runLater(()->{
+                        Platform.runLater(() -> {
                             serverPath.setText(listMessage.getPath());
                             serverView.getItems().clear();
                             serverView.getItems().add("...");
@@ -77,13 +82,29 @@ public class ClientController implements Initializable {
         }
     }
 
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
             Socket socket = new Socket("localhost", 8189);
             objectEncoderOutputStream = new ObjectEncoderOutputStream(socket.getOutputStream());
             objectDecoderInputStream = new ObjectDecoderInputStream(socket.getInputStream());
-            clientDirectory = Paths.get("ClientDirectory");
+            clientDirectory = Paths.get("ClientDirectory").toAbsolutePath();
+
+            clientView.setOnMouseClicked(event -> {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    String item = clientView.getSelectionModel().getSelectedItem();
+                    if ("...".equals(item)) {
+                        if (clientDirectory.getParent() != null) {
+                            clientDirectory = clientDirectory.getParent();
+                        }
+                    } else if (clientDirectory.resolve(item).toFile().isDirectory()) {
+                        clientDirectory = clientDirectory.resolve(item);
+                    }
+                    updateClientView();
+                }
+            });
+
             updateClientView();
             Thread readThread = new Thread(() -> read());
             readThread.setDaemon(true);
