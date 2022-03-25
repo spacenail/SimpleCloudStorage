@@ -48,12 +48,21 @@ public class ClientController implements Initializable {
         Platform.exit();
     }
 
-    public void updateClientView() {
+    public void updateView(Path path) {
         Platform.runLater(() -> {
-            clientPath.setText(clientDirectory.toAbsolutePath().toString());
+            clientPath.setText(path.toAbsolutePath().toString());
             clientView.getItems().clear();
             clientView.getItems().add("...");
-            clientView.getItems().addAll(clientDirectory.toFile().list());
+            clientView.getItems().addAll(path.toFile().list());
+        });
+    }
+
+    public void updateView(ListMessage listMessage){
+        Platform.runLater(() -> {
+            serverPath.setText(listMessage.getPath());
+            serverView.getItems().clear();
+            serverView.getItems().add("...");
+            serverView.getItems().addAll(listMessage.getList());
         });
     }
 
@@ -65,16 +74,11 @@ public class ClientController implements Initializable {
                     case FILE:
                         FileMessage fileMessage = (FileMessage) message;
                         Files.write(clientDirectory.resolve(fileMessage.getName()), fileMessage.getBytes());
-                        updateClientView();
+                        updateView(clientDirectory);
                         break;
                     case LIST:
                         ListMessage listMessage = (ListMessage) message;
-                        Platform.runLater(() -> {
-                            serverPath.setText(listMessage.getPath());
-                            serverView.getItems().clear();
-                            serverView.getItems().add("...");
-                            serverView.getItems().addAll(listMessage.getList());
-                        });
+                        updateView(listMessage);
                         break;
                 }
             } catch (ClassNotFoundException | IOException e) {
@@ -93,7 +97,7 @@ public class ClientController implements Initializable {
             } else if (clientDirectory.resolve(item).toFile().isDirectory()) {
                 clientDirectory = clientDirectory.resolve(item);
             }
-            updateClientView();
+            updateView(clientDirectory);
         }
     }
 
@@ -108,8 +112,8 @@ public class ClientController implements Initializable {
 
             clientView.setOnMouseClicked(this::clientViewHandler);
 
-            updateClientView();
-            Thread readThread = new Thread(() -> read());
+            updateView(clientDirectory);
+            Thread readThread = new Thread(this::read);
             readThread.setDaemon(true);
             readThread.start();
         } catch (IOException e) {
