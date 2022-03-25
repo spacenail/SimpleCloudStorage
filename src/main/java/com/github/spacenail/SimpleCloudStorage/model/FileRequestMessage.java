@@ -1,14 +1,20 @@
 package com.github.spacenail.SimpleCloudStorage.model;
 
 public class FileRequestMessage implements CloudMessage {
-    private final String name;
+    private final String reqPath;
+    private final String dstPath;
 
-    public FileRequestMessage(String name) {
-        this.name = name;
+    public FileRequestMessage(String reqPath, String dstPath) {
+        this.reqPath = reqPath;
+        this.dstPath = dstPath;
     }
 
-    public String getName() {
-        return name;
+    public String getReqPath() {
+        return reqPath;
+    }
+
+    public String getDstPath() {
+        return dstPath;
     }
 
     @Override

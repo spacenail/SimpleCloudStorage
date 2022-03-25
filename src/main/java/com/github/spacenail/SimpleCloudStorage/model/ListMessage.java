@@ -10,7 +10,7 @@ public class ListMessage implements CloudMessage{
 
     public ListMessage(Path path) {
         list = Arrays.asList(path.toFile().list());
-        this.path = path.toString();
+        this.path = path.normalize().toAbsolutePath().toString();
     }
     public String getPath() {
         return path;

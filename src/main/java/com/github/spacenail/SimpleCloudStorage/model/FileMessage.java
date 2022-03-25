@@ -6,25 +6,25 @@ import java.nio.file.Path;
 
 public class FileMessage implements CloudMessage {
     private final byte[] bytes;
-    private final int size;
     private final String name;
+    private final String path;
 
-    public FileMessage(Path path) throws IOException {
-       bytes = Files.readAllBytes(path);
-       size = bytes.length;
-       name = path.getFileName().toString();
+    public FileMessage(Path srcPath, String dstPath) throws IOException {
+       bytes = Files.readAllBytes(srcPath);
+       name = srcPath.getFileName().toString();
+       this.path = dstPath;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getSize() {
-        return size;
-    }
-
     public byte[] getBytes(){
         return bytes;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     @Override

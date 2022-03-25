@@ -1,9 +1,6 @@
 package com.github.spacenail.SimpleCloudStorage.client;
 
-import com.github.spacenail.SimpleCloudStorage.model.CloudMessage;
-import com.github.spacenail.SimpleCloudStorage.model.FileMessage;
-import com.github.spacenail.SimpleCloudStorage.model.FileRequestMessage;
-import com.github.spacenail.SimpleCloudStorage.model.ListMessage;
+import com.github.spacenail.SimpleCloudStorage.model.*;
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import javafx.application.Platform;
@@ -37,14 +34,26 @@ public class ClientController implements Initializable {
     private Path clientDirectory;
 
     public void download() throws IOException {
-        objectEncoderOutputStream.writeObject(new FileRequestMessage(serverView.getSelectionModel().getSelectedItem()));
+        objectEncoderOutputStream.writeObject(new FileRequestMessage(
+                getPath(serverPath.getText(), serverView.getSelectionModel().getSelectedItem())
+                        .normalize().toAbsolutePath().toString(),
+                clientPath.getText())
+        );
     }
 
     public void upload() throws IOException {
-        objectEncoderOutputStream.writeObject(new FileMessage(clientDirectory.resolve(clientView.getSelectionModel().getSelectedItem())));
+        objectEncoderOutputStream.writeObject(new FileMessage(
+                getPath(clientPath.getText(), clientView.getSelectionModel().getSelectedItem()),
+                serverPath.getText())
+        );
     }
 
-    public void close() {
+    private Path getPath(String dir, String file) {
+        return Paths.get(dir).resolve(file);
+    }
+
+    @FXML
+    private void close() {
         Platform.exit();
     }
 
@@ -57,7 +66,7 @@ public class ClientController implements Initializable {
         });
     }
 
-    public void updateView(ListMessage listMessage){
+    public void updateView(ListMessage listMessage) {
         Platform.runLater(() -> {
             serverPath.setText(listMessage.getPath());
             serverView.getItems().clear();
@@ -73,7 +82,10 @@ public class ClientController implements Initializable {
                 switch (message.getMessageType()) {
                     case FILE:
                         FileMessage fileMessage = (FileMessage) message;
-                        Files.write(clientDirectory.resolve(fileMessage.getName()), fileMessage.getBytes());
+                        Files.write(Paths.get(fileMessage.getPath())
+                                        .resolve(fileMessage.getName())
+                                , fileMessage.getBytes()
+                        );
                         updateView(clientDirectory);
                         break;
                     case LIST:
@@ -87,7 +99,7 @@ public class ClientController implements Initializable {
         }
     }
 
-    private void clientViewHandler(MouseEvent event){
+    private void clientViewHandler(MouseEvent event) {
         if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
             String item = clientView.getSelectionModel().getSelectedItem();
             if ("...".equals(item)) {
@@ -101,6 +113,21 @@ public class ClientController implements Initializable {
         }
     }
 
+    private void serverViewHandler(MouseEvent event) {
+        try {
+            if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                String item = serverView.getSelectionModel().getSelectedItem();
+                if ("...".equals(item)) {
+                    objectEncoderOutputStream.writeObject(new ListRequestMessage(serverPath.getText(), ".."));
+                } else if (item != null) {
+                    objectEncoderOutputStream.writeObject(new ListRequestMessage(serverPath.getText(), item));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -111,6 +138,7 @@ public class ClientController implements Initializable {
             clientDirectory = Paths.get("ClientDirectory").toAbsolutePath();
 
             clientView.setOnMouseClicked(this::clientViewHandler);
+            serverView.setOnMouseClicked(this::serverViewHandler);
 
             updateView(clientDirectory);
             Thread readThread = new Thread(this::read);
