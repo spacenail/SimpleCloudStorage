@@ -1,7 +1,6 @@
 package com.github.spacenail.SimpleCloudStorage.client;
 
 import com.github.spacenail.SimpleCloudStorage.model.*;
-import io.netty.channel.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -27,10 +26,10 @@ public class ClientController implements Initializable {
     @FXML
     private TextField serverPath;
     private Path clientDirectory;
-    private ChannelHandlerContext ctx;
+    private Network network;
 
     public void download() {
-        ctx.writeAndFlush(new FileRequestMessage(
+        network.send(new FileRequestMessage(
                 getPath(serverPath.getText(), serverView.getSelectionModel().getSelectedItem())
                         .normalize().toAbsolutePath().toString(),
                 clientPath.getText())
@@ -38,7 +37,7 @@ public class ClientController implements Initializable {
     }
 
     public void upload() throws IOException {
-        ctx.writeAndFlush(new FileMessage(
+        network.send(new FileMessage(
                 getPath(clientPath.getText(), clientView.getSelectionModel().getSelectedItem()),
                 serverPath.getText())
         );
@@ -89,9 +88,9 @@ public class ClientController implements Initializable {
         if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
             String item = serverView.getSelectionModel().getSelectedItem();
             if ("...".equals(item)) {
-                ctx.writeAndFlush(new ListRequestMessage(serverPath.getText(), ".."));
+                network.send(new ListRequestMessage(serverPath.getText(), ".."));
             } else if (item != null) {
-                ctx.writeAndFlush(new ListRequestMessage(serverPath.getText(), item));
+                network.send(new ListRequestMessage(serverPath.getText(), item));
             }
         }
     }
@@ -103,18 +102,15 @@ public class ClientController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Network network = new Network(this);
+        network = new Network(this);
         clientDirectory = Paths.get("ClientDirectory").toAbsolutePath();
         clientView.setOnMouseClicked(this::clientViewHandler);
         serverView.setOnMouseClicked(this::serverViewHandler);
-
 
         Thread t1 = new Thread(network);
         t1.setDaemon(true);
         t1.start();
 
         updateView(clientDirectory);
-
-        ctx = network.getContext();
     }
 }
