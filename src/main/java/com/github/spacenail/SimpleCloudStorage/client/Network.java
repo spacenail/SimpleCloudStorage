@@ -15,7 +15,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Network implements Runnable{
+public class Network implements Runnable {
     private ChannelFuture channelFuture;
     private final Bootstrap bootstrap;
     private final EventLoopGroup executors = new NioEventLoopGroup(1);
@@ -54,22 +54,27 @@ public class Network implements Runnable{
         });
     }
 
-    public void send(Object msg){
+    public void send(Object msg) {
         channel.writeAndFlush(msg);
+    }
+
+    public void close() {
+        channelFuture.channel().close();
+        executors.shutdownGracefully();
     }
 
 
     @Override
     public void run() {
-    try {
-        channelFuture = bootstrap.connect("localhost", 8189).sync();
-        channel = channelFuture.channel();
-        channelFuture.channel().closeFuture().sync();
-    } catch (InterruptedException e){
-        e.printStackTrace();
-    }finally {
-        channelFuture.channel().close();
-        executors.shutdownGracefully();
-    }
+        try {
+            channelFuture = bootstrap.connect("localhost", 8189).sync();
+            channel = channelFuture.channel();
+            channelFuture.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            channelFuture.channel().close();
+            executors.shutdownGracefully();
+        }
     }
 }
