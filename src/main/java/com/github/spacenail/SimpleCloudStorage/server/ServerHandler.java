@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
-    private Path serverDirectory = Paths.get("ServerDirectory");
+    private final Path serverDirectory = Paths.get("ServerDirectory");
     private static final Logger log = LogManager.getLogger();
 
     @Override
