@@ -17,7 +17,6 @@ public final class Server {
         Logger log = LogManager.getLogger(Server.class);
         EventLoopGroup connections = new NioEventLoopGroup(1);
         EventLoopGroup messages = new NioEventLoopGroup();
-        final ChannelHandler serverHandler = new ServerHandler();
         try{
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(connections,messages);
@@ -27,7 +26,7 @@ public final class Server {
             protected void initChannel(SocketChannel socketChannel) {
                 socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
-                socketChannel.pipeline().addLast("logic", serverHandler);
+                socketChannel.pipeline().addLast("logic", new ServerHandler());
             }
         });
         log.trace("Server started");
