@@ -59,7 +59,6 @@ public class Network implements Runnable {
     }
 
     public void close() {
-        channelFuture.channel().close();
         executors.shutdownGracefully();
     }
 
