@@ -17,29 +17,30 @@ public final class Server {
         Logger log = LogManager.getLogger(Server.class);
         EventLoopGroup connections = new NioEventLoopGroup(1);
         EventLoopGroup messages = new NioEventLoopGroup();
-        try{
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(connections,messages);
-        serverBootstrap.channel(NioServerSocketChannel.class);
-        serverBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel socketChannel) {
-                socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
-                socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
-                socketChannel.pipeline().addLast("logic", new ServerHandler());
-            }
-        });
-        log.trace("Server started");
-        ChannelFuture channelFuture = serverBootstrap.bind(8189).sync();
-        log.trace("Server wait connections...");
-        channelFuture.channel().closeFuture().sync();
-    } catch (InterruptedException e){
-            log.fatal("Fatal error!");
-        e.printStackTrace();
-        }finally {
+        try {
+            ServerBootstrap serverBootstrap = new ServerBootstrap()
+                    .group(connections, messages)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel socketChannel) {
+                            socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+                            socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
+                            socketChannel.pipeline().addLast("logic", new ServerHandler());
+                        }
+                    });
+            log.trace("Server started");
+            ChannelFuture channelFuture = serverBootstrap.bind(8189).sync();
+            log.trace("Server wait connections...");
+            channelFuture.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
+            log.fatal("Interrupt");
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+        } finally {
             connections.shutdownGracefully();
             messages.shutdownGracefully();
             log.trace("Server shutdown");
         }
-        }
+    }
 }

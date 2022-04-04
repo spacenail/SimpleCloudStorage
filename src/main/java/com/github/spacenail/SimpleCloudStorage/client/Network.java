@@ -16,7 +16,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Network implements Runnable {
-    private ChannelFuture channelFuture;
     private final Bootstrap bootstrap;
     private final EventLoopGroup executors = new NioEventLoopGroup(1);
     private Channel channel;
@@ -66,13 +65,13 @@ public class Network implements Runnable {
     @Override
     public void run() {
         try {
-            channelFuture = bootstrap.connect("localhost", 8189).sync();
+            ChannelFuture channelFuture = bootstrap.connect("localhost", 8189).sync();
             channel = channelFuture.channel();
-            channelFuture.channel().closeFuture().sync();
+            channel.closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            channelFuture.channel().close();
+            channel.close();
             executors.shutdownGracefully();
         }
     }
