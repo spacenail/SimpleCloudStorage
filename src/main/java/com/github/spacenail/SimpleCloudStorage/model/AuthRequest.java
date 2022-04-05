@@ -13,4 +13,20 @@ public class AuthRequest implements CloudMessage{
     public MessageType getMessageType() {
         return MessageType.AUTH_REQUEST;
     }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthRequest{" +
+                "login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
 }

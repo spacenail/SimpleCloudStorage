@@ -10,9 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
-    private ClientController clientController;
+    private final ClientController clientController;
 
-    public void setClientController(ClientController clientController) {
+    public ClientHandler(ClientController clientController) {
         this.clientController = clientController;
     }
 
@@ -28,6 +28,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 break;
             case LIST:
                 ListMessage listMessage = (ListMessage) message;
+                System.out.println("LIST_MESSAGE "+ listMessage);
                 clientController.updateView(listMessage);
                 break;
         }

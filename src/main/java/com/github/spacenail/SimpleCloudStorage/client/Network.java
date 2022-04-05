@@ -11,12 +11,12 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 
 
 public class Network implements Runnable {
-    private final Bootstrap bootstrap;
+    public final Bootstrap bootstrap;
     private final EventLoopGroup executors = new NioEventLoopGroup(1);
     private Channel channel;
 
 
-    public Network() {
+    public Network(AuthController authController) {
         bootstrap = new Bootstrap();
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.group(executors);
@@ -25,6 +25,7 @@ public class Network implements Runnable {
             protected void initChannel(SocketChannel socketChannel) {
                 socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
+                socketChannel.pipeline().addLast("logic",new AuthHandler(authController));
             }
         });
     }
@@ -37,12 +38,9 @@ public class Network implements Runnable {
         executors.shutdownGracefully();
     }
 
-    public void deleteHandler(ChannelHandler handler) {
-        channel.pipeline().remove(handler);
-    }
-
-    public void addHandler(ChannelHandler handler) {
-        channel.pipeline().addLast(handler);
+    public void changeHandler(ChannelHandler newHandler) {
+        channel.pipeline().remove("logic");
+        channel.pipeline().addLast(newHandler);
     }
 
     @Override
@@ -50,11 +48,11 @@ public class Network implements Runnable {
         try {
             ChannelFuture channelFuture = bootstrap.connect("localhost", 8189).sync();
             channel = channelFuture.channel();
+            System.out.println(channel.pipeline().toString());
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            channel.close();
             executors.shutdownGracefully();
         }
     }

@@ -99,8 +99,9 @@ public class ClientController implements Initializable {
         return clientDirectory;
     }
 
-    public void setNetwork(Network network) {
+    public void initNetwork(Network network) {
         this.network = network;
+        network.changeHandler(new ClientHandler(this));
     }
 
     @Override

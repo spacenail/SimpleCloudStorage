@@ -7,9 +7,9 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 public class AuthHandler extends SimpleChannelInboundHandler<CloudMessage> {
-    private AuthController authController;
+    private final AuthController authController;
 
-    public void setAuthController(AuthController authController) {
+    public AuthHandler(AuthController authController) {
         this.authController = authController;
     }
 

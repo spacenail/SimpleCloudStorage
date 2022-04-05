@@ -10,11 +10,17 @@ import javafx.stage.Stage;
 import java.util.Objects;
 
 public class Client extends Application {
+    AuthController authController;
+
+    @Override
+    public void stop() {
+        authController.closeNetwork();
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("auth.fxml"));
-
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("auth.fxml"));
+        authController = loader.getController();
         Parent parent = loader.load();
         primaryStage.setScene(new Scene(parent));
         primaryStage.setTitle("SimpleCloudStorage");

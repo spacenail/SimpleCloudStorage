@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
     private final Path serverDirectory = Paths.get("ServerDirectory");
     private static final Logger log = LogManager.getLogger();
+    private boolean isAuth;
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) {
@@ -56,9 +57,22 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 }
                 break;
             case AUTH_REQUEST:
-                log.trace("incoming AUTH_REQUEST message");
-                ctx.writeAndFlush(new AuthResponse(true));
+                AuthRequest authRequest = (AuthRequest) cloudMessage;
+                log.trace("incoming AUTH_REQUEST message " + authRequest);
+                checkAuth(authRequest);
+                ctx.writeAndFlush(new AuthResponse(isAuth));
+                log.trace("send AUTH_RESPONSE message " + isAuth);
+                if(isAuth){
+                    ctx.writeAndFlush(new ListMessage(serverDirectory));
+                    log.trace("send LIST_MESSAGE message " + serverDirectory);
+                }
                 break;
+        }
+    }
+
+    private void checkAuth(AuthRequest authRequest) {
+        if(authRequest.getLogin().equals("user") && authRequest.getPassword().equals("password")){
+            isAuth = true;
         }
     }
 }

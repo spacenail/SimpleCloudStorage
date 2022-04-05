@@ -9,7 +9,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,7 +16,6 @@ import java.util.ResourceBundle;
 
 public class AuthController implements Initializable {
     private Network network;
-    private AuthHandler authHandler;
 
     @FXML
     private TextField login;
@@ -49,39 +47,30 @@ public class AuthController implements Initializable {
         }
     }
 
-    private void closeNetwork(WindowEvent event) {
+    public void closeNetwork() {
         network.close();
     }
 
     private void changeWindow() {
-        Platform.runLater(() -> {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("navigator.fxml"));
-            Stage stage = (Stage) failAuth.getScene().getWindow();
-            ClientController clientController = loader.getController();
-            clientController.setNetwork(network);
-            ClientHandler clientHandler = new ClientHandler();
-            clientHandler.setClientController(clientController);
-            network.deleteHandler(authHandler);
-            network.addHandler(clientHandler);
-
-            try {
-                stage.setScene(new Scene(loader.load()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            stage.show();
+        Platform.runLater(()->{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("navigator.fxml"));
+            Stage stage = (Stage) login.getScene().getWindow();
+        try {
+            stage.setScene(
+                    new Scene(
+                            loader.load()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ClientController clientController = loader.getController();
+        clientController.initNetwork(network);
+        stage.show();
         });
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Stage stage = (Stage) failAuth.getScene().getWindow();
-        stage.setOnCloseRequest(this::closeNetwork);
-        network = new Network();
-        authHandler = new AuthHandler();
-        authHandler.setAuthController(this);
-        network.addHandler(authHandler);
+        network = new Network(this);
         Thread networkThread = new Thread(network);
         networkThread.start();
     }
