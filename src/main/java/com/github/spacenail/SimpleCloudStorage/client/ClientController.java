@@ -28,10 +28,6 @@ public class ClientController implements Initializable {
     private Path clientDirectory;
     private Network network;
 
-    public void closeNetwork(){
-        network.close();
-    }
-
     public void download() {
         network.send(new FileRequestMessage(
                 getPath(serverPath.getText(), serverView.getSelectionModel().getSelectedItem())
@@ -103,15 +99,15 @@ public class ClientController implements Initializable {
         return clientDirectory;
     }
 
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        network = new Network(this);
         clientDirectory = Paths.get("ClientDirectory").toAbsolutePath();
         clientView.setOnMouseClicked(this::clientViewHandler);
         serverView.setOnMouseClicked(this::serverViewHandler);
-        Thread networkThread = new Thread(network);
-        networkThread.start();
         updateView(clientDirectory);
     }
 }

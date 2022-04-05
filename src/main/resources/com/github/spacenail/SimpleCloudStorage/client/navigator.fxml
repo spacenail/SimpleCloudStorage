@@ -6,13 +6,9 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="371.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.311" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.spacenail.SimpleCloudStorage.client.ClientController">
     <MenuBar layoutY="-2.0" prefHeight="32.0" prefWidth="600.0">
-        <menus>
-            <Menu mnemonicParsing="false" text="Menu">
-                <items>
-                    <MenuItem mnemonicParsing="false" onAction="#close" text="Close" />
-                </items>
-            </Menu>
-        </menus>
+        <Menu mnemonicParsing="false" text="Menu">
+            <MenuItem mnemonicParsing="false" onAction="#close" text="Close"/>
+        </Menu>
     </MenuBar>
     <ListView fx:id="clientView" layoutX="14.0" layoutY="67.0" prefHeight="281.0" prefWidth="257.0" />
     <ListView fx:id="serverView" layoutX="329.0" layoutY="67.0" prefHeight="281.0" prefWidth="257.0" />

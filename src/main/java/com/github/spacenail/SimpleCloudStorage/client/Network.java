@@ -1,8 +1,5 @@
 package com.github.spacenail.SimpleCloudStorage.client;
 
-import com.github.spacenail.SimpleCloudStorage.model.CloudMessage;
-import com.github.spacenail.SimpleCloudStorage.model.FileMessage;
-import com.github.spacenail.SimpleCloudStorage.model.ListMessage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,8 +9,6 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class Network implements Runnable {
     private final Bootstrap bootstrap;
@@ -21,8 +16,7 @@ public class Network implements Runnable {
     private Channel channel;
 
 
-    public Network(ClientController controller) {
-
+    public Network() {
         bootstrap = new Bootstrap();
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.group(executors);
@@ -31,24 +25,6 @@ public class Network implements Runnable {
             protected void initChannel(SocketChannel socketChannel) {
                 socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
-                socketChannel.pipeline().addLast("logic", new SimpleChannelInboundHandler<CloudMessage>() {
-                    @Override
-                    protected void channelRead0(ChannelHandlerContext ctx, CloudMessage message) throws Exception {
-                        switch (message.getMessageType()) {
-                            case FILE:
-                                FileMessage fileMessage = (FileMessage) message;
-                                Files.write(Paths.get(fileMessage.getPath())
-                                        .resolve(fileMessage.getName()), fileMessage.getBytes()
-                                );
-                                controller.updateView(controller.getClientDirectory());
-                                break;
-                            case LIST:
-                                ListMessage listMessage = (ListMessage) message;
-                                controller.updateView(listMessage);
-                                break;
-                        }
-                    }
-                });
             }
         });
     }
@@ -61,6 +37,13 @@ public class Network implements Runnable {
         executors.shutdownGracefully();
     }
 
+    public void deleteHandler(ChannelHandler handler) {
+        channel.pipeline().remove(handler);
+    }
+
+    public void addHandler(ChannelHandler handler) {
+        channel.pipeline().addLast(handler);
+    }
 
     @Override
     public void run() {

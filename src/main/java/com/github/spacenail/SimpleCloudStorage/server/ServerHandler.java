@@ -22,7 +22,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) {
         log.trace("Connected: " + ctx.channel().remoteAddress());
-        ctx.writeAndFlush(new ListMessage(serverDirectory));
     }
 
 
@@ -55,6 +54,10 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 if (pathRequest.toAbsolutePath().toFile().isDirectory()) {
                     ctx.writeAndFlush(new ListMessage(pathRequest.toAbsolutePath()));
                 }
+                break;
+            case AUTH_REQUEST:
+                log.trace("incoming AUTH_REQUEST message");
+                ctx.writeAndFlush(new AuthResponse(true));
                 break;
         }
     }
