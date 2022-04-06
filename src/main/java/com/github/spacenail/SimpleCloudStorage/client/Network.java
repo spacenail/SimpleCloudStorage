@@ -25,7 +25,7 @@ public class Network implements Runnable {
             protected void initChannel(SocketChannel socketChannel) {
                 socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
-                socketChannel.pipeline().addLast("logic",new AuthHandler(authController));
+                socketChannel.pipeline().addLast("logic", new AuthHandler(authController));
             }
         });
     }
@@ -48,7 +48,6 @@ public class Network implements Runnable {
         try {
             ChannelFuture channelFuture = bootstrap.connect("localhost", 8189).sync();
             channel = channelFuture.channel();
-            System.out.println(channel.pipeline().toString());
             channel.closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();

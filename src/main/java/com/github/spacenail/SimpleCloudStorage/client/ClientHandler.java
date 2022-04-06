@@ -21,6 +21,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
         switch (message.getMessageType()) {
             case FILE:
                 FileMessage fileMessage = (FileMessage) message;
+                System.out.println("FILE_MESSAGE "+ fileMessage);
                 Files.write(Paths.get(fileMessage.getPath())
                         .resolve(fileMessage.getName()), fileMessage.getBytes()
                 );

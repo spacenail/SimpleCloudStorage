@@ -13,11 +13,6 @@ public class Client extends Application {
     AuthController authController;
 
     @Override
-    public void stop() {
-        authController.closeNetwork();
-    }
-
-    @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("auth.fxml"));
         authController = loader.getController();
@@ -27,6 +22,7 @@ public class Client extends Application {
         primaryStage.getIcons().add(new Image(
                 Objects.requireNonNull(
                         Client.class.getResourceAsStream("cloud.png"))));
+        primaryStage.setOnCloseRequest(e->{authController.closeNetwork();});
         primaryStage.show();
     }
 

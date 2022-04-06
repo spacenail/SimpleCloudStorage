@@ -17,6 +17,9 @@ public class ListRequestMessage implements CloudMessage{
         this.resolve = resolve;
     }
 
+    public ListRequestMessage(){
+    }
+
     @Override
     public MessageType getMessageType() {
         return MessageType.LIST_REQUEST;

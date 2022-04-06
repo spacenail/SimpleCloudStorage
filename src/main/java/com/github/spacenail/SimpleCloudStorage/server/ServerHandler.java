@@ -50,10 +50,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
             case LIST_REQUEST:
                 log.trace("incoming LIST_REQUEST message");
                 ListRequestMessage listRequestMessage = (ListRequestMessage) cloudMessage;
-                Path pathRequest = Paths.get(listRequestMessage.getPath(),
-                        listRequestMessage.getResolve());
-                if (pathRequest.toAbsolutePath().toFile().isDirectory()) {
-                    ctx.writeAndFlush(new ListMessage(pathRequest.toAbsolutePath()));
+                if (listRequestMessage.getPath() == null) {
+                    ctx.writeAndFlush(new ListMessage(serverDirectory));
+                } else {
+                    Path pathRequest = Paths.get(listRequestMessage.getPath(),
+                            listRequestMessage.getResolve());
+                    if (pathRequest.toAbsolutePath().toFile().isDirectory()) {
+                        ctx.writeAndFlush(new ListMessage(pathRequest.toAbsolutePath()));
+                    }
                 }
                 break;
             case AUTH_REQUEST:
@@ -62,16 +66,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 checkAuth(authRequest);
                 ctx.writeAndFlush(new AuthResponse(isAuth));
                 log.trace("send AUTH_RESPONSE message " + isAuth);
-                if(isAuth){
-                    ctx.writeAndFlush(new ListMessage(serverDirectory));
-                    log.trace("send LIST_MESSAGE message " + serverDirectory);
-                }
                 break;
         }
     }
 
     private void checkAuth(AuthRequest authRequest) {
-        if(authRequest.getLogin().equals("user") && authRequest.getPassword().equals("password")){
+        if (authRequest.getLogin().equals("user") && authRequest.getPassword().equals("password")) {
             isAuth = true;
         }
     }

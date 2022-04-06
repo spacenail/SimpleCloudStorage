@@ -49,6 +49,7 @@ public class ClientController implements Initializable {
 
     @FXML
     private void close() {
+        closeNetwork();
         Platform.exit();
     }
 
@@ -102,6 +103,9 @@ public class ClientController implements Initializable {
     public void initNetwork(Network network) {
         this.network = network;
         network.changeHandler(new ClientHandler(this));
+    }
+    public void closeNetwork(){
+        network.close();
     }
 
     @Override

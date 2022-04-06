@@ -1,6 +1,7 @@
 package com.github.spacenail.SimpleCloudStorage.client;
 
 import com.github.spacenail.SimpleCloudStorage.model.AuthRequest;
+import com.github.spacenail.SimpleCloudStorage.model.ListRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,7 +26,7 @@ public class AuthController implements Initializable {
     private Label failAuth;
 
     public void close() {
-        network.close();
+        closeNetwork();
         Platform.exit();
     }
 
@@ -64,7 +65,9 @@ public class AuthController implements Initializable {
         }
         ClientController clientController = loader.getController();
         clientController.initNetwork(network);
+        stage.setOnCloseRequest(e->clientController.closeNetwork());
         stage.show();
+        network.send(new ListRequestMessage()); //first request for show server catalog
         });
     }
 
