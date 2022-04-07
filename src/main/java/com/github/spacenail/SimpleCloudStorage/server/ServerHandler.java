@@ -36,40 +36,46 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
         switch (cloudMessage.getMessageType()) {
             case FILE:
                 log.trace("incoming FILE message");
-                FileMessage fileMessage = (FileMessage) cloudMessage;
-                Files.write(Paths.get(fileMessage
-                                .getPath())
-                                .resolve(fileMessage.getName())
-                        , fileMessage.getBytes()
-                );
-                ctx.writeAndFlush(
-                        new ListMessage(
-                                Paths.get(
-                                        fileMessage.getPath()
-                                )
-                        )
-                );
-                log.trace("send FILE_MESSAGE message");
+                if(isAuthorized) {
+                    FileMessage fileMessage = (FileMessage) cloudMessage;
+                    Files.write(Paths.get(fileMessage
+                                    .getPath())
+                                    .resolve(fileMessage.getName())
+                            , fileMessage.getBytes()
+                    );
+                    ctx.writeAndFlush(
+                            new ListMessage(
+                                    Paths.get(
+                                            fileMessage.getPath()
+                                    )
+                            )
+                    );
+                    log.trace("send FILE_MESSAGE message");
+                }
                 break;
             case FILE_REQUEST:
                 log.trace("incoming FILE_REQUEST message");
-                FileRequestMessage fileRequestMessage = (FileRequestMessage) cloudMessage;
-                Path path = Paths.get(fileRequestMessage.getReqPath());
-                ctx.writeAndFlush(new FileMessage(path, fileRequestMessage.getDstPath()));
-                log.trace("send FILE_MESSAGE message");
+                if(isAuthorized) {
+                    FileRequestMessage fileRequestMessage = (FileRequestMessage) cloudMessage;
+                    Path path = Paths.get(fileRequestMessage.getReqPath());
+                    ctx.writeAndFlush(new FileMessage(path, fileRequestMessage.getDstPath()));
+                    log.trace("send FILE_MESSAGE message");
+                }
                 break;
             case LIST_REQUEST:
                 log.trace("incoming LIST_REQUEST message");
-                ListRequestMessage listRequestMessage = (ListRequestMessage) cloudMessage;
-                if (listRequestMessage.getPath() == null) {
-                    ctx.writeAndFlush(new ListMessage(serverDirectory));
-                    log.trace("send LIST_MESSAGE message");
-                } else {
-                    Path pathRequest = Paths.get(listRequestMessage.getPath(),
-                            listRequestMessage.getResolve());
-                    if (pathRequest.toAbsolutePath().toFile().isDirectory()) {
-                        ctx.writeAndFlush(new ListMessage(pathRequest.toAbsolutePath()));
+                if(isAuthorized) {
+                    ListRequestMessage listRequestMessage = (ListRequestMessage) cloudMessage;
+                    if (listRequestMessage.getPath() == null) {
+                        ctx.writeAndFlush(new ListMessage(serverDirectory));
                         log.trace("send LIST_MESSAGE message");
+                    } else {
+                        Path pathRequest = Paths.get(listRequestMessage.getPath(),
+                                listRequestMessage.getResolve());
+                        if (pathRequest.toAbsolutePath().toFile().isDirectory()) {
+                            ctx.writeAndFlush(new ListMessage(pathRequest.toAbsolutePath()));
+                            log.trace("send LIST_MESSAGE message");
+                        }
                     }
                 }
                 break;
