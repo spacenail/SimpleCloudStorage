@@ -23,7 +23,7 @@ public class Network implements Runnable {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) {
-                socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(ClassResolvers.cacheDisabled(null)));
+                socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(5242880,ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
                 socketChannel.pipeline().addLast("logic", new AuthHandler(authController));
             }
