@@ -19,6 +19,7 @@ public class ServerNetwork {
     private Logger log;
     private ServerBootstrap serverBootstrap;
     private final DataBase db;
+    private final int MAX_FILE_SIZE = 5242880; // 5Mb
 
     public ServerNetwork() {
         networkInit();
@@ -51,7 +52,7 @@ public class ServerNetwork {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                                   @Override
                                   protected void initChannel(SocketChannel socketChannel) {
-                                      socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(5242880,ClassResolvers.cacheDisabled(null)));
+                                      socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(MAX_FILE_SIZE,ClassResolvers.cacheDisabled(null)));
                                       socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
                                       socketChannel.pipeline().addLast("logic", new ServerHandler(db));
                                   }

@@ -11,8 +11,8 @@
     </MenuBar>
     <Label layoutX="120.0" layoutY="87.0" text="Login" />
     <Label layoutX="121.0" layoutY="133.0" text="Password" />
-    <TextField fx:id="login" focusTraversable="false" layoutX="236.0" layoutY="82.0" promptText="IIvanov" />
-    <TextField fx:id="password" focusTraversable="false" layoutX="237.0" layoutY="123.0" promptText="123456" />
+    <TextField fx:id="login" focusTraversable="false" layoutX="236.0" layoutY="82.0" promptText="user" />
+    <TextField fx:id="password" focusTraversable="false" layoutX="237.0" layoutY="123.0" promptText="password" />
     <Button layoutX="201.0" layoutY="195.0" mnemonicParsing="false" onAction="#logInButton" prefHeight="31.0" prefWidth="124.0" text="Log In" />
     <Label fx:id="failAuth" layoutX="237.0" layoutY="55.0" prefHeight="22.0" prefWidth="149.0" textFill="#fa2100" />
 
