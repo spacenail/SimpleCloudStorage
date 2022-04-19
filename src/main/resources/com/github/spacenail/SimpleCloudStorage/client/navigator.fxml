@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="371.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.311" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.spacenail.SimpleCloudStorage.client.ClientController">
+    <MenuBar layoutY="-2.0" prefHeight="32.0" prefWidth="600.0">
+        <Menu mnemonicParsing="false" text="Menu">
+            <MenuItem mnemonicParsing="false" onAction="#close" text="Close"/>
+        </Menu>
+    </MenuBar>
+    <ListView fx:id="clientView" layoutX="14.0" layoutY="67.0" prefHeight="281.0" prefWidth="257.0" />
+    <ListView fx:id="serverView" layoutX="329.0" layoutY="67.0" prefHeight="281.0" prefWidth="257.0" />
+    <TextField fx:id="clientPath" editable="false" layoutX="14.0" layoutY="37.0" prefHeight="27.0" prefWidth="257.0" />
+    <TextField fx:id="serverPath" editable="false" layoutX="329.0" layoutY="37.0" prefHeight="26.0" prefWidth="257.0" />
+    <Button layoutX="283.0" layoutY="115.0" mnemonicParsing="false" onAction="#download" prefHeight="26.0" prefWidth="35.0" text="&lt;" textAlignment="CENTER" textFill="#08cd01">
+        <font>
+            <Font name="System Bold" size="18.0" />
+        </font>
+    </Button>
+    <Button layoutX="283.0" layoutY="208.0" mnemonicParsing="false" onAction="#upload" prefHeight="26.0" prefWidth="35.0" text="&gt;" textFill="#f50f07">
+        <font>
+            <Font name="System Bold" size="18.0" />
+        </font>
+    </Button>
+
+</AnchorPane>
