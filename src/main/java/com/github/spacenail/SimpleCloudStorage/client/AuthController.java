@@ -25,13 +25,14 @@ public class AuthController implements Initializable {
     @FXML
     private Label failAuth;
 
-    public void close() {
+    @FXML
+    private void close() {
         closeNetwork();
         Platform.exit();
     }
 
-
-    public void logInButton() {
+    @FXML
+    private void logInButton() {
         network.send(new AuthRequest(
                 login.getText(),
                 password.getText())
@@ -40,19 +41,19 @@ public class AuthController implements Initializable {
         password.clear();
     }
 
-    public void auth(boolean isAuth) {
+    void auth(boolean isAuth) {
         if (isAuth) {
-            changeWindow();
+            openManagerWindow();
         } else {
             Platform.runLater(() -> failAuth.setText("Bad credentials"));
         }
     }
 
-    public void closeNetwork() {
+    void closeNetwork() {
         network.close();
     }
 
-    private void changeWindow() {
+    private void openManagerWindow() {
         Platform.runLater(()->{
             FXMLLoader loader = new FXMLLoader(getClass().getResource("navigator.fxml"));
             Stage stage = (Stage) login.getScene().getWindow();
@@ -76,5 +77,28 @@ public class AuthController implements Initializable {
         network = new Network(this);
         Thread networkThread = new Thread(network);
         networkThread.start();
+    }
+
+    @FXML
+    private void signUpButton() {
+        openRegWindow();
+    }
+
+    private void openRegWindow() {
+        Platform.runLater(()->{
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("register.fxml"));
+            Stage stage = (Stage) login.getScene().getWindow();
+            try {
+                stage.setScene(
+                        new Scene(
+                                loader.load()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            RegController regController = loader.getController();
+            regController.initNetwork(network);
+            stage.setOnCloseRequest(e->regController.closeNetwork());
+            stage.show();
+        });
     }
 }
