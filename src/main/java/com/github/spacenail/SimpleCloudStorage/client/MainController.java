@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-public class ClientController implements Initializable {
+public class MainController implements Initializable {
     @FXML
     private ListView<String> clientView;
     @FXML
@@ -27,6 +27,10 @@ public class ClientController implements Initializable {
     private TextField serverPath;
     private Path clientDirectory;
     private Network network;
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
 
     public void download() {
         network.send(new FileRequestMessage(
@@ -49,7 +53,6 @@ public class ClientController implements Initializable {
 
     @FXML
     private void close() {
-        closeNetwork();
         Platform.exit();
     }
 
@@ -100,13 +103,6 @@ public class ClientController implements Initializable {
         return clientDirectory;
     }
 
-    public void initNetwork(Network network) {
-        this.network = network;
-        network.changeHandler(new ClientHandler(this));
-    }
-    public void closeNetwork(){
-        network.close();
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

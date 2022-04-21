@@ -1,8 +1,6 @@
 package com.github.spacenail.SimpleCloudStorage.client;
 
-import com.github.spacenail.SimpleCloudStorage.model.CloudMessage;
-import com.github.spacenail.SimpleCloudStorage.model.FileMessage;
-import com.github.spacenail.SimpleCloudStorage.model.ListMessage;
+import com.github.spacenail.SimpleCloudStorage.model.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -10,10 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
-    private final ClientController clientController;
+    private final MainController mainController;
+    private final AuthController authController;
+    private final RegController regController;
 
-    public ClientHandler(ClientController clientController) {
-        this.clientController = clientController;
+
+    public ClientHandler(MainController mainController, AuthController authController, RegController regController) {
+        this.mainController = mainController;
+        this.authController = authController;
+        this.regController = regController;
     }
 
     @Override
@@ -21,16 +24,28 @@ public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
         switch (message.getMessageType()) {
             case FILE:
                 FileMessage fileMessage = (FileMessage) message;
-                System.out.println("FILE_MESSAGE "+ fileMessage);
+                System.out.println("FILE_MESSAGE " + fileMessage);
                 Files.write(Paths.get(fileMessage.getPath())
                         .resolve(fileMessage.getName()), fileMessage.getBytes()
                 );
-                clientController.updateView(clientController.getClientDirectory());
+                mainController.updateView(mainController.getClientDirectory());
                 break;
             case LIST:
                 ListMessage listMessage = (ListMessage) message;
-                System.out.println("LIST_MESSAGE "+ listMessage);
-                clientController.updateView(listMessage);
+                System.out.println("LIST_MESSAGE " + listMessage);
+                mainController.updateView(listMessage);
+                break;
+            case AUTH_RESPONSE:
+                AuthResponse authResponse = (AuthResponse) message;
+                authController.auth(authResponse.isAuth());
+                break;
+            case REG_RESPONSE:
+                RegResponse regResponse = (RegResponse) message;
+                if (regResponse.isSuccessCreateUser()) {
+                    regController.closeWindow();
+                } else {
+                    regController.showErrorMessage(regResponse.getMessage());
+                }
                 break;
         }
     }
