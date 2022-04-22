@@ -24,7 +24,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
         switch (message.getMessageType()) {
             case FILE:
                 FileMessage fileMessage = (FileMessage) message;
-                System.out.println("FILE_MESSAGE " + fileMessage);
+                //System.out.println("FILE_MESSAGE " + fileMessage);
                 Files.write(Paths.get(fileMessage.getPath())
                         .resolve(fileMessage.getName()), fileMessage.getBytes()
                 );
@@ -32,17 +32,19 @@ public class ClientHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 break;
             case LIST:
                 ListMessage listMessage = (ListMessage) message;
-                System.out.println("LIST_MESSAGE " + listMessage);
+                //System.out.println("LIST_MESSAGE " + listMessage);
                 mainController.updateView(listMessage);
                 break;
             case AUTH_RESPONSE:
                 AuthResponse authResponse = (AuthResponse) message;
+                //System.out.println("AUTH_RESPONSE message " + message);
                 authController.auth(authResponse.isAuth());
                 break;
             case REG_RESPONSE:
                 RegResponse regResponse = (RegResponse) message;
+                //System.out.println("REG_RESPONSE message " + message);
                 if (regResponse.isSuccessCreateUser()) {
-                    regController.closeWindow();
+                    regController.openAuthWindow();
                 } else {
                     regController.showErrorMessage(regResponse.getMessage());
                 }

@@ -43,10 +43,10 @@ public class RegController implements Initializable {
 
     @FXML
     private void cancelButton() {
-        closeWindow();
+        openAuthWindow();
     }
 
-    void closeWindow() {
+    void openAuthWindow() {
         Platform.runLater(() -> {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("auth.fxml"));
             loader.setController(authController);
@@ -63,7 +63,7 @@ public class RegController implements Initializable {
     }
 
     public void showErrorMessage(String message) {
-        existUser.setText(message);
+        Platform.runLater(() -> existUser.setText(message));
     }
 
     void setNetwork(Network network) {

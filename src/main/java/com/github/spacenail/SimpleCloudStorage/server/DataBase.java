@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.sql.*;
-import java.util.Arrays;
 
 public class DataBase {
     private Connection connection;
@@ -108,7 +107,7 @@ public class DataBase {
             insertStatement.setString(1, username);
             insertStatement.setString(2, hexPassword);
             insertStatement.setString(3, hexSalt);
-            isSuccess = insertStatement.execute();
+            isSuccess = insertStatement.executeUpdate() == 1;
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }

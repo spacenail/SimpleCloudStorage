@@ -43,11 +43,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                                     .resolve(fileMessage.getName())
                             , fileMessage.getBytes()
                     );
-                    ctx.writeAndFlush(
-                            new ListMessage(
-                                    Paths.get(
-                                            fileMessage.getPath()
-                                    )
+                    ctx.writeAndFlush(new ListMessage(
+                                    Paths.get(fileMessage.getPath())
                             )
                     );
                     log.trace("send FILE_MESSAGE message");

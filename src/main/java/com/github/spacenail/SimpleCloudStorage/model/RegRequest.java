@@ -1,8 +1,8 @@
 package com.github.spacenail.SimpleCloudStorage.model;
 
-public class RegRequest implements CloudMessage{
-    private String username;
-    private String password;
+public class RegRequest implements CloudMessage {
+    private final String username;
+    private final String password;
 
     public RegRequest(String username, String password) {
         this.username = username;
@@ -20,5 +20,11 @@ public class RegRequest implements CloudMessage{
 
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String toString() {
+        return "username=" + username +
+                " password=" + password;
     }
 }
