@@ -17,16 +17,16 @@ public class Network implements Runnable {
     private final int MAX_FILE_SIZE = 5242880; // 5Mb
 
 
-    public Network(AuthController authController) {
+    public Network(ChannelHandler handler) {
         bootstrap = new Bootstrap();
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.group(executors);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel socketChannel) {
-                socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(MAX_FILE_SIZE,ClassResolvers.cacheDisabled(null)));
+                socketChannel.pipeline().addFirst("decoder", new ObjectDecoder(MAX_FILE_SIZE, ClassResolvers.cacheDisabled(null)));
                 socketChannel.pipeline().addLast("encoder", new ObjectEncoder());
-                socketChannel.pipeline().addLast("logic", new AuthHandler(authController));
+                socketChannel.pipeline().addLast("logic", handler);
             }
         });
     }
@@ -37,11 +37,6 @@ public class Network implements Runnable {
 
     public void close() {
         executors.shutdownGracefully();
-    }
-
-    public void changeHandler(ChannelHandler newHandler) {
-        channel.pipeline().remove("logic");
-        channel.pipeline().addLast(newHandler);
     }
 
     @Override

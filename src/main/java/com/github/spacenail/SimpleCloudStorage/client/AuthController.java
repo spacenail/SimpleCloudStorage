@@ -16,22 +16,32 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class AuthController implements Initializable {
-    private Network network;
-
     @FXML
     private TextField login;
     @FXML
     private TextField password;
     @FXML
     private Label failAuth;
+    private MainController mainController;
+    private RegController regController;
+    private Network network;
 
-    public void close() {
-        closeNetwork();
+    public AuthController(MainController mainController, RegController regController) {
+        this.mainController = mainController;
+        this.regController = regController;
+    }
+
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    @FXML
+    private void close() {
         Platform.exit();
     }
 
-
-    public void logInButton() {
+    @FXML
+    private void logInButton() {
         network.send(new AuthRequest(
                 login.getText(),
                 password.getText())
@@ -40,41 +50,56 @@ public class AuthController implements Initializable {
         password.clear();
     }
 
-    public void auth(boolean isAuth) {
+    void auth(boolean isAuth) {
         if (isAuth) {
-            changeWindow();
+            openMainWindow();
         } else {
             Platform.runLater(() -> failAuth.setText("Bad credentials"));
         }
     }
 
-    public void closeNetwork() {
-        network.close();
-    }
 
-    private void changeWindow() {
-        Platform.runLater(()->{
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("navigator.fxml"));
+    private void openMainWindow() {
+        Platform.runLater(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
+            loader.setController(mainController);
             Stage stage = (Stage) login.getScene().getWindow();
-        try {
-            stage.setScene(
-                    new Scene(
-                            loader.load()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ClientController clientController = loader.getController();
-        clientController.initNetwork(network);
-        stage.setOnCloseRequest(e->clientController.closeNetwork());
-        stage.show();
-        network.send(new ListRequestMessage()); //first request for show server catalog
+            try {
+                stage.setScene(
+                        new Scene(
+                                loader.load()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            stage.show();
+            network.send(new ListRequestMessage()); //first request for show server catalog
         });
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        network = new Network(this);
-        Thread networkThread = new Thread(network);
-        networkThread.start();
+    }
+
+    @FXML
+    private void signUpButton() {
+        openRegWindow();
+    }
+
+    private void openRegWindow() {
+        Platform.runLater(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("register.fxml"));
+            loader.setController(regController);
+            regController.setAuthController(this);
+            Stage stage = (Stage) login.getScene().getWindow();
+            try {
+                stage.setScene(
+                        new Scene(
+                                loader.load()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            stage.show();
+        });
     }
 }

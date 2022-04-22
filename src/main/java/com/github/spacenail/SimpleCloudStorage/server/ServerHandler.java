@@ -36,18 +36,15 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
         switch (cloudMessage.getMessageType()) {
             case FILE:
                 log.trace("incoming FILE message");
-                if(isAuthorized) {
+                if (isAuthorized) {
                     FileMessage fileMessage = (FileMessage) cloudMessage;
                     Files.write(Paths.get(fileMessage
                                     .getPath())
                                     .resolve(fileMessage.getName())
                             , fileMessage.getBytes()
                     );
-                    ctx.writeAndFlush(
-                            new ListMessage(
-                                    Paths.get(
-                                            fileMessage.getPath()
-                                    )
+                    ctx.writeAndFlush(new ListMessage(
+                                    Paths.get(fileMessage.getPath())
                             )
                     );
                     log.trace("send FILE_MESSAGE message");
@@ -55,7 +52,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 break;
             case FILE_REQUEST:
                 log.trace("incoming FILE_REQUEST message");
-                if(isAuthorized) {
+                if (isAuthorized) {
                     FileRequestMessage fileRequestMessage = (FileRequestMessage) cloudMessage;
                     Path path = Paths.get(fileRequestMessage.getReqPath());
                     ctx.writeAndFlush(new FileMessage(path, fileRequestMessage.getDstPath()));
@@ -64,7 +61,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 break;
             case LIST_REQUEST:
                 log.trace("incoming LIST_REQUEST message");
-                if(isAuthorized) {
+                if (isAuthorized) {
                     ListRequestMessage listRequestMessage = (ListRequestMessage) cloudMessage;
                     if (listRequestMessage.getPath() == null) {
                         ctx.writeAndFlush(new ListMessage(serverDirectory));
@@ -86,6 +83,19 @@ public class ServerHandler extends SimpleChannelInboundHandler<CloudMessage> {
                 ctx.writeAndFlush(new AuthResponse(isAuthorized));
                 log.trace("send AUTH_RESPONSE message " + isAuthorized);
                 break;
+            case REG_REQUEST:
+                RegRequest regRequest = (RegRequest) cloudMessage;
+                log.trace("incoming REG_REQUEST message " + regRequest);
+                if (db.select(regRequest.getUsername())) {
+                    ctx.writeAndFlush(new RegResponse(false, "Username is already exist!"));
+                } else {
+                    boolean success = db.insert(regRequest.getUsername(), regRequest.getPassword());
+                    if (success) {
+                        ctx.writeAndFlush(new RegResponse(true));
+                    } else {
+                        ctx.writeAndFlush(new RegResponse(false, "User creation error"));
+                    }
+                }
         }
     }
 
